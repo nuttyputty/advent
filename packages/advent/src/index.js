@@ -2,7 +2,7 @@
 
 const EventEmitter = require('events')
 const isObject = require('lodash.isplainobject')
-const createEngine = require('advent-memory')
+const createEngine = require('@nuttyputty/advent-memory')
 const uuid = require('uuid').v4
 const createEntity = require('./entity')
 

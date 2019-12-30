@@ -19,7 +19,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "advent-memory": "^2.0.6",
+    "@nuttyputty/advent-memory": "^2.0.6",
     "lodash.isplainobject": "^4.0.6",
     "uuid": "^3.3.2"
   },
