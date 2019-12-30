@@ -39,7 +39,8 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
         state = snap
         return snap
       }
-      return events.reduce((oldState, event) => {
+     
+     return events.reduce((oldState, event) => {
         state = update(oldState, reducer(oldState, event))
         state.id = id
         state.version = state.version || 0
