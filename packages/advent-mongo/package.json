@@ -1,5 +1,5 @@
 {
-  "name": "advent-mongo",
+  "name": "@nuttyputty/advent-mongo",
   "version": "2.0.7",
   "description": "MongoDB engine for advent.",
   "keywords": [
