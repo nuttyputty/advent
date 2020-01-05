@@ -49,19 +49,24 @@ const createStore = (decider, reducer, options = {}) => {
   }
 
   const get = id => {
+    let unbind
     const subscribe = (type, fn) => {
       if (isFunction(type)) {
         fn = type
         type = null
       }
 
-      return listen(id, (event, ...args) => {
+      unbind = listen(id, (event, ...args) => {
         if (!type || type === event.type) fn(event, ...args)
       })
     }
 
     const getState = () => entity(id).getState()
-    const clearState = () => entity(id).clear()
+    const clearState = () => {
+      if(unbind)unbind()
+      entity(id).clear()
+    }
+
     const dispatch = cmd => send(id, cmd)
     return { subscribe, getState, clearState, dispatch }
   }
