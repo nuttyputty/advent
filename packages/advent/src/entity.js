@@ -106,6 +106,7 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
     const getState = async () => {
       if(!state)
         state = await load()
+      console.log(state);
       return state
     }
 
