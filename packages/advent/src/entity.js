@@ -8,7 +8,7 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
   const cache = {}
 
   const getEntity = id => {
-    let state = load()
+    let state
     let queue = []
     let stream = []
     let loading = false
@@ -104,6 +104,7 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
     }
 
     const getState = () => {
+      if(!state) state = load()
       return state
     }
 
