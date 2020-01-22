@@ -61,6 +61,8 @@ const createStore = (decider, reducer, options = {}) => {
       })
     }
 
+
+    const setState = state => entity(id).setState(state)
     const getState = () => entity(id).getState()
     const clearState = () => {
       if(unbind)unbind()
@@ -68,7 +70,7 @@ const createStore = (decider, reducer, options = {}) => {
     }
 
     const dispatch = cmd => send(id, cmd)
-    return { subscribe, getState, clearState, dispatch }
+    return { subscribe, getState, setState, clearState, dispatch }
   }
 
   const clear = () => entity.clear()

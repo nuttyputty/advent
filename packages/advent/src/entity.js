@@ -39,7 +39,7 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
         state = snap
         return snap
       }
-     
+
      return events.reduce((oldState, event) => {
         state = update(oldState, reducer(oldState, event))
         state.id = id
@@ -107,6 +107,10 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
       return state
     }
 
+    const setState = newState => {
+      state = newState
+    }
+
     const toEvent = event => {
       if (!isObject(event)) {
         throw new TypeError('Event must be a plain object.')
@@ -119,7 +123,7 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
       return { ...event, id: uuid(), cid: event.id, ts: Date.now() }
     }
 
-    return { clear, execute, commit, getState }
+    return { clear, execute, commit, getState, setState }
   }
 
   return id => (cache[id] = cache[id] || getEntity(id))
