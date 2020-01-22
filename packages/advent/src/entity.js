@@ -12,13 +12,14 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
     let queue = []
     let stream = []
     let loading = false
-
+    let loaded = false
     const init = [{ type: '__init__', payload: {} }]
 
     const clear = () => {
       stream = []
       queue = []
       loading = false
+      loaded = false
       state = undefined
       delete cache[id]
       return id
@@ -31,6 +32,7 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
       loading = true
       const { events, snap } = await engine.load(id)
       loading = false
+      loaded = true
       return reduce(events, "load", true, snap)
     }
 
@@ -104,9 +106,8 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
     }
 
     const getState = async () => {
-      if(!state)
+      if(!loaded)
         state = await load()
-      console.log(state);
       return state
     }
 
