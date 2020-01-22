@@ -103,8 +103,9 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
       return JSON.parse(JSON.stringify(data))
     }
 
-    const getState = () => {
-      if(!state) state = load()
+    const getState = async () => {
+      if(!state)
+        state = await load()
       return state
     }
 

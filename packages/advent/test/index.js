@@ -105,7 +105,7 @@ describe('advent', () => {
       const entity = store.get('1')
 
       await entity.dispatch({ type: 'increment', payload })
-      should(entity.getState()).containEql(payload)
+      should(await entity.getState()).containEql(payload)
     })
 
     it('should dispatch multiple commands to alter state', async () => {
@@ -117,7 +117,7 @@ describe('advent', () => {
         { type: 'decrement', payload: { value: 5 } },
         { type: 'increment', payload: { value: 15 } }
       ])
-      should(entity.getState()).containEql({ value: 20 })
+      should(await entity.getState()).containEql({ value: 20 })
     })
 
     it('should snapshot state based on given snapRate', async () => {
@@ -134,7 +134,7 @@ describe('advent', () => {
       ]
 
       await entity.dispatch(commands)
-      should(entity.getState()).containEql({ version: snapRate, revision: commands.length })
+      should(await entity.getState()).containEql({ version: snapRate, revision: commands.length })
     })
   })
 
