@@ -1,6 +1,6 @@
 {
   "name": "@nuttyputty/advent",
-  "version": "2.0.14-logs",
+  "version": "2.0.15",
   "description": "Event sourcing made simple.",
   "keywords": [
     "store",
