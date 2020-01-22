@@ -290,19 +290,4 @@ describe('advent', () => {
     })
   })
 
-  describe('clearState', () => {
-    it('should clear an entity state', async () => {
-      const store = advent.createStore(decider, reducer)
-      const entity = store.get('1')
-
-      await entity.dispatch([
-        { type: 'increment', payload: { value: 10 } },
-        { type: 'decrement', payload: { value: 5 } },
-        { type: 'increment', payload: { value: 15 } }
-      ])
-
-      entity.clearState()
-      should(entity.getState() === undefined).be.true()
-    })
-  })
 })
