@@ -27,13 +27,14 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
 
     const load = async reload => {
       if (reload) clear()
-      if (state) return state
+      if (loaded) return state
       reduce(init, null, true)
       loading = true
       const { events, snap } = await engine.load(id)
       loading = false
       loaded = true
-      return reduce(events, "load", true, snap)
+      const current = await reduce(events, "load", true, snap)
+      return current
     }
 
     const reduce = (events = [], command, silent, snap) => {
@@ -106,7 +107,8 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
     }
 
     const getState = async () => {
-      if(!loaded)
+      console.log("CALL");
+      if(!loaded && !loading)
         state = await load()
       return state
     }
