@@ -107,7 +107,6 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
     }
 
     const getState = async () => {
-      console.log("CALL");
       if(!loaded && !loading)
         state = await load()
       return state
