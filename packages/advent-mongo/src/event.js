@@ -71,7 +71,7 @@ module.exports = async ({ db, collections = {} } = {}) => {
       }
     }
 
-    if (_events.length === 0) return []
+    if (_events.length === 0 || _events.some(e=>e._id)) return []
     return events.insertMany(_events)
   }
 
