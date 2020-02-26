@@ -20,14 +20,43 @@ module.exports = async ({ db, collections = {} } = {}) => {
   /**
    * Get sequence number for versioning.
    *
-   * @param {String} name
-   * @return {Promise}
-   * @public
+   * @param {String} entity
+   * @return {Number}
+   * @private
    */
 
-  const seq = entity => {
-    const update = { $inc: { seq: 1 }, $set: { entity } }
-    return counts.updateOne({ entity }, update, { upsert: true })
+  const getSeq = async entity => {
+    const doc = await counts.findOne({ entity })
+    return doc ? doc.seq : 0
+  }
+
+  /**
+   * Set sequence number for versioning.
+   *
+   * @param {String} entity
+   * @param {Number} seq
+   * @private
+   */
+
+  const setSeq = async (entity, seq) => {
+    counts.updateOne({ entity }, {seq}, { upsert: true })
+  }
+
+  /**
+   * Get number from the first event.
+   *
+   * @param {Array} data
+   * @return {String}
+   * @private
+   */
+
+  const getName = data => {
+    const {entity} = [...data].pop()
+    if (entity && entity.name && entity.id) {
+      return `${entity.name}:${entity.id}`
+    }
+
+    return null
   }
 
   /**
@@ -60,18 +89,15 @@ module.exports = async ({ db, collections = {} } = {}) => {
       return []
     }
 
-    const _events = []
+    const name = getName(data)
+    let seq = await getSeq(name)
 
-    for (const event of data) {
-      const { entity } = event
-
-      if (entity && entity.name && entity.id) {
-        const { seq: revision } = await seq(`${entity.name}:${entity.id}`)
-        _events.push(Object.assign(event, { revision }))
-      }
-    }
+    const _events = name ? data.map(event=>
+      Object.assign(event, { revision: ++seq  })
+    ) : []
 
     if (_events.length === 0 || _events.some(e=>e._id)) return []
+    await setSeq(name, seq)
     return events.insertMany(_events)
   }
 
