@@ -9,7 +9,8 @@
  */
 
 module.exports = async ({ db, collections = {} } = {}) => {
-  const snapshots = await db.get(collections.events || 'snapshots')
+
+  const snapshots = await db.get(collections.snapshots || 'snapshots')
 
   await snapshots.createIndex({ id: 1, version: 1 })
   await snapshots.createIndex({ version: 1 })
@@ -24,7 +25,7 @@ module.exports = async ({ db, collections = {} } = {}) => {
    */
 
   const load = async id => {
-    const docs = await snapshots.findMany({ id }, {limit: 1, sort: '-version' })
+    const docs = await snapshots.findMany({ _id: id }, {limit: 1, sort: '-version' })
     const snap = Array.isArray(docs) ? docs[0] : docs
     if (snap) delete snap._id
     return snap
@@ -40,9 +41,9 @@ module.exports = async ({ db, collections = {} } = {}) => {
    */
 
   const save = snap => {
-    if (!snap || !snap.id || !snap.version) return
-    delete snap._id
-    return snapshots.insertOne(snap)
+    if (!snap || !snap.version) return
+    const {_id, id, ...rest} = snap
+    return snapshots.updateById(id, rest)
   }
 
   return { load, save }
