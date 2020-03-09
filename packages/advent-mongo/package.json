@@ -1,6 +1,6 @@
 {
   "name": "@nuttyputty/advent-mongo",
-  "version": "2.0.22",
+  "version": "2.0.23",
   "description": "MongoDB engine for advent.",
   "keywords": [
     "store",
