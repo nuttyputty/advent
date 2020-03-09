@@ -27,14 +27,6 @@ module.exports = async ({ db, collections = {} } = {}) => {
   const load = async id => {
     const docs = await snapshots.findMany({ _id: id }, {limit: 1, sort: '-version' })
     const snap = Array.isArray(docs) ? docs[0] : docs
-    if(!snap.version){
-      const coll = await db.get('snapshots')
-      const docs2 = await coll.findMany({ id }, {limit: 1, sort: '-version' })
-      const snap2 = Array.isArray(docs2) ? docs2[0] : docs2
-      if (snap2) delete snap2._id
-      return snap2
-    }
-    
     if (snap) delete snap._id
     return snap
   }
