@@ -31,8 +31,8 @@ const createStore = (decider, reducer, options = {}) => {
       throw new TypeError('Command must have a payload.')
     }
 
-    const { type, user = {}, meta = {}, payload } = command
-    return { type, user, meta, payload, id: uuid(), ts: Date.now(), entity: { name, id } }
+    const { type, user = {}, meta = {}, online = [], payload } = command
+    return { type, user, meta, online, payload, id: uuid(), ts: Date.now(), entity: { name, id } }
   }
 
   const send = async (id, data) => {
@@ -101,11 +101,12 @@ const packer = (type, fn, options = {}) => {
     let data = fn(...args)
 
     if (isObject(data)) {
-      let { user, meta, entity, ...payload } = data
+      let { user, online, meta, entity,  ...payload } = data
       user = user || options.user
       meta = meta || options.meta
       entity = entity || options.entity
-      data = { user, meta, entity, payload }
+      online = online || []
+      data = { user, meta, entity, online, payload }
     } else {
       data = { payload: data }
     }

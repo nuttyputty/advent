@@ -56,11 +56,11 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
     }
 
     const run = async command => {
-      const { user, meta, entity } = command
+      const { user, meta, entity, online } = command
       let events = await decider(await load(), command)
       events = events || []
       events = Array.isArray(events) ? events : [events]
-      events = events.map(event => toEvent({ ...command, ...event, user, meta, entity }))
+      events = events.map(event => toEvent({ ...command, ...event, user, meta, entity, online }))
       return reduce(await commit(events), command)
     }
 
