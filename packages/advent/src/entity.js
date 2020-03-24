@@ -4,13 +4,12 @@ const isObject = require('lodash.isplainobject')
 const uuid = require('uuid').v4
 const update = require('./update')
 
-module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
+module.exports = ({ engine, decider, reducer, emitter }) => {
   const cache = {}
 
   const getEntity = id => {
     let state
     let loaded = false
-    const init = [{ type: '__init__', payload: {} }]
 
     const clear = () => {
       loaded = false
@@ -22,8 +21,7 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
     const load = async reload => {
       if (reload) clear()
       if (loaded) return state
-      reduce(init, null, true)
-      const { events, snap } = await engine.load(id)
+      const { snap } = await engine.load(id)
       state = snap
       loaded = true
       return state
@@ -42,30 +40,27 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
       }, snap || state)
     }
 
+    const commit = async (events = []) => {
+      state = clone({ ...state, version: state.revision-1 })
+      await engine.save([...events], state)
+      return events
+    }
+
     const run = async command => {
       const { user, meta, entity, online } = command
       let events = await decider(await load(), command)
       events = events || []
       events = Array.isArray(events) ? events : [events]
       events = events.map(event => toEvent({ ...command, ...event, user, meta, entity, online }))
-      await reduce(events, command)
-      await commit(events)
+      if(events.length > 0){
+        await reduce(events, command)
+        await commit(events)
+      }
     }
 
     const execute = async command => {
       await run(command)
       return state
-    }
-
-    const commit = async (events = []) => {
-      let snap
-
-      if (events.length) {
-        snap = clone({ ...state, version: state.revision })
-      }
-
-      await engine.save(events, snap)
-      return events
     }
 
     const clone = data => {

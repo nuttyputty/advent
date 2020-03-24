@@ -3,7 +3,7 @@
 const should = require('should')
 const advent = require('../src/index')
 
-const decider = (state, command) => {
+const decider = (state = initialState, command) => {
   switch (command.type) {
     case 'increment':
       return [
@@ -120,8 +120,9 @@ describe('advent', () => {
       should(await entity.getState()).containEql({ value: 20 })
     })
 
-    it('should snapshot state based on given snapRate', async () => {
-      const snapRate = 3
+    //no longer relevant since snaprate is constant, might change for something else
+    it.skip('should snapshot state based on given snapRate', async () => {
+      const snapRate = 1
       const store = advent.createStore(decider, reducer, { snapRate })
       const entity = store.get('1')
 
