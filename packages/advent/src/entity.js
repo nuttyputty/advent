@@ -9,16 +9,10 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
 
   const getEntity = id => {
     let state
-    let queue = []
-    let stream = []
-    let loading = false
     let loaded = false
     const init = [{ type: '__init__', payload: {} }]
 
     const clear = () => {
-      stream = []
-      queue = []
-      loading = false
       loaded = false
       state = undefined
       delete cache[id]
@@ -29,20 +23,13 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
       if (reload) clear()
       if (loaded) return state
       reduce(init, null, true)
-      loading = true
       const { events, snap } = await engine.load(id)
-      loading = false
+      state = snap
       loaded = true
-      const current = await reduce(events, "load", true, snap)
-      return current
+      return state
     }
 
     const reduce = (events = [], command, silent, snap) => {
-      if(command === "load" && events.length === 0 && snap){
-        state = snap
-        return snap
-      }
-
      return events.reduce((oldState, event) => {
         state = update(oldState, reducer(oldState, event))
         state.id = id
@@ -61,44 +48,23 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
       events = events || []
       events = Array.isArray(events) ? events : [events]
       events = events.map(event => toEvent({ ...command, ...event, user, meta, entity, online }))
-      return reduce(await commit(events), command)
+      await reduce(events, command)
+      await commit(events)
     }
 
     const execute = async command => {
-      if (loading && command.payload) {
-        return new Promise((resolve, reject) => {
-          queue.push(() =>
-            run(command)
-              .then(resolve)
-              .catch(reject)
-          )
-        })
-      }
-
       await run(command)
-
-      setImmediate(async () => {
-        while (queue.length > 0) await queue.shift()()
-      })
       return state
     }
 
     const commit = async (events = []) => {
-      stream.push(...events)
-
       let snap
 
-      if (
-        typeof state.version === 'number' &&
-        snapRate &&
-        state.revision >= state.version + snapRate
-      ) {
-        state.version = state.revision
+      if (events.length) {
         snap = clone({ ...state, version: state.revision })
       }
 
-      await engine.save(stream, snap)
-      stream = []
+      await engine.save(events, snap)
       return events
     }
 
@@ -107,7 +73,7 @@ module.exports = ({ engine, decider, reducer, emitter, snapRate = 0 }) => {
     }
 
     const getState = async () => {
-      if(!loaded && !loading)
+      if(!loaded)
         state = await load()
       return state
     }
