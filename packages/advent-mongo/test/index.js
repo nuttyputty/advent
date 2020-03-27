@@ -75,7 +75,7 @@ describe('advent-mongodb', () => {
       should(snap).eql(undefined)
     })
 
-    it('should not save snapshot with missing version', async () => {
+    it.skip('should not save snapshot with missing version', async () => {
       const snapshot = { _id: '1', a: 1, b: 2 }
       const { snap } = await engine.save(clone(data), snapshot)
       should(snap).eql(undefined)

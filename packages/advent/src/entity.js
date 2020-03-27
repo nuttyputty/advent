@@ -31,8 +31,6 @@ module.exports = ({ engine, decider, reducer, emitter }) => {
      return events.reduce((oldState, event) => {
         state = update(oldState, reducer(oldState, event))
         state.id = id
-        state.version = state.version || 0
-        state.revision = event.revision || 0
         if (silent) return state
         const change = { command, oldState, newState: state }
         ;['*', id, event.type].forEach(type => emitter.emit(type, event, change))
@@ -41,7 +39,6 @@ module.exports = ({ engine, decider, reducer, emitter }) => {
     }
 
     const commit = async (events = []) => {
-      state = clone({ ...state, version: state.revision-1 })
       await engine.save([...events], state)
       return events
     }
@@ -61,10 +58,6 @@ module.exports = ({ engine, decider, reducer, emitter }) => {
     const execute = async command => {
       await run(command)
       return state
-    }
-
-    const clone = data => {
-      return JSON.parse(JSON.stringify(data))
     }
 
     const getState = async () => {

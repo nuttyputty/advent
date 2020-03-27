@@ -11,7 +11,7 @@
 module.exports = async ({ db, collections = {} } = {}) => {
 
   const snapshots = await db.get(collections.snapshots || 'snapshots')
-
+  const counts = await db.get('counts')
   await snapshots.createIndex({ id: 1, version: 1 })
   await snapshots.createIndex({ version: 1 })
   await snapshots.createIndex({ id: 1 })
@@ -32,6 +32,19 @@ module.exports = async ({ db, collections = {} } = {}) => {
   }
 
   /**
+   * Get sequence number for versioning.
+   *
+   * @param {String} entity
+   * @return {Number}
+   * @private
+   */
+
+  const getSeq = async entity => {
+    const doc = await counts.findOne({ entity })
+    return doc ? doc.seq : 0
+  }
+
+  /**
    * Commit a single entity `snapshot`.
    *
    * @param {Entity} entity
@@ -40,9 +53,10 @@ module.exports = async ({ db, collections = {} } = {}) => {
    * @public
    */
 
-  const save = snap => {
-    if (!snap || !snap.version) return
+  const save = async snap => {
+    if(!snap) return
     const {_id, id, ...rest} = snap
+    snap.version = await getSeq(`${snap.type}:${id}`)
     return snapshots.updateById(id, rest)
   }
 
