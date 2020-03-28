@@ -6,7 +6,6 @@ const update = require('./update')
 
 module.exports = ({ engine, decider, reducer, emitter }) => {
   const cache = {}
-
   const getEntity = id => {
     let state
     let loaded = false
@@ -27,19 +26,22 @@ module.exports = ({ engine, decider, reducer, emitter }) => {
       return state
     }
 
-    const reduce = (events = [], command, silent, snap) => {
-     return events.reduce((oldState, event) => {
-        state = update(oldState, reducer(oldState, event))
+    const reduce = (events = [], command, silent) => {
+      return events.reduce((changes, event) => {
+        const oldState = {...state}
+        const reduction = reducer(oldState, event)
+        state = update(oldState, reduction)
+        changes = {...changes, ...reduction}
         state.id = id
-        if (silent) return state
-        const change = { command, oldState, newState: state }
+        if (silent) return changes
+        const change = { command, oldState, newState: {...state} }
         ;['*', id, event.type].forEach(type => emitter.emit(type, event, change))
-        return state
-      }, snap || state)
+        return changes
+      }, {id})
     }
 
-    const commit = async (events = []) => {
-      await engine.save([...events], state)
+    const commit = async (events = [], changes) => {
+      await engine.save([...events], changes)
       return events
     }
 
@@ -50,8 +52,8 @@ module.exports = ({ engine, decider, reducer, emitter }) => {
       events = Array.isArray(events) ? events : [events]
       events = events.map(event => toEvent({ ...command, ...event, user, meta, entity, online }))
       if(events.length > 0){
-        await reduce(events, command)
-        await commit(events)
+        const changes = await reduce(events, command)
+        await commit(events, changes)
       }
     }
 
