@@ -31,7 +31,16 @@ const resolve = (original, updates, isNull) => {
 
 const update = (original, update, ...args) => {
   update = args.reduce((o, n) => resolve(o, n, true), update)
-  return resolve(original, update)
+
+
+  const newState = resolve(original, update)
+  return [
+    newState,
+    keys(update).reduce((obj, k)=>{
+      obj[k] = newState[k]
+      return obj
+    }, {})
+  ]
 }
 
 module.exports = update

@@ -29,9 +29,9 @@ module.exports = ({ engine, decider, reducer, emitter }) => {
     const reduce = (events = [], command, silent) => {
       return events.reduce((changes, event) => {
         const oldState = {...state}
-        const reduction = reducer(oldState, event)
-        state = update(oldState, reduction)
-        changes = {...changes, ...reduction}
+        const [newState, updated] = update(oldState, reducer(oldState, event))
+        state = {...newState}
+        changes = {...changes, ...updated}
         state.id = id
         if (silent) return changes
         const change = { command, oldState, newState: {...state} }
