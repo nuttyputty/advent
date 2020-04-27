@@ -29,10 +29,10 @@ module.exports = ({ engine, decider, reducer, emitter }) => {
     const reduce = (events = [], command, silent) => {
       return events.reduce((changes, event) => {
         const oldState = {...state}
+        ++oldState.revision
         const [newState, updated] = update(oldState, reducer(oldState, event))
         state = {...newState}
-        changes = {...changes, ...updated}
-        state.id = id
+        changes = {...changes, ...updated, revision: oldState.revision}
         if (silent) return changes
         const change = { command, oldState, newState: {...state} }
         ;['*', id, event.type].forEach(type => emitter.emit(type, event, change))

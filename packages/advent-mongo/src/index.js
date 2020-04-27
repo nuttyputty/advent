@@ -47,8 +47,7 @@ module.exports = (conn, options = {}) => {
   const load = async id => {
     await init()
     const snap = await snapshot.load(id)
-    const events = await event.load(id, snap)
-    return { snap, events }
+    return { snap, events: [] }
   }
 
   /**
@@ -62,8 +61,8 @@ module.exports = (conn, options = {}) => {
 
   const save = async (events, snap) => {
     await init()
-    snap = await snapshot.save(snap)
     events = await event.save(events)
+    snap = await snapshot.save(snap)
     return { snap, events }
   }
 
